@@ -1,0 +1,800 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FivePD.net</name>
+    </assembly>
+    <members>
+        <member name="T:FivePD.API.CalloutPropertiesAttribute">
+            <summary>
+            Bundles callout properties (CalloutPropertiesAttribute is used in the CalloutManager)
+            </summary>
+        </member>
+        <member name="P:FivePD.API.CalloutPropertiesAttribute.name">
+            <summary>The name of the callout as shown in the Debug menu and in the console (See <see cref="F:FivePD.API.Callout.ShortName"/> for the dispatch name)</summary>
+        </member>
+        <member name="P:FivePD.API.CalloutPropertiesAttribute.version">
+            <summary>
+            The version of the callout.
+            <example>
+            For example: <c>1.2.3</c>
+            </example>
+            </summary>
+        </member>
+        <member name="M:FivePD.API.CalloutPropertiesAttribute.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Callout properties
+            </summary>
+            <param name="name">The name of the callout as shown in the Debug menu and in the console (See <see cref="F:FivePD.API.Callout.ShortName"/> for the dispatch name)</param>
+            <param name="version">The version of the callout. <example>For example: <c>1.2.3</c></example></param>
+        </member>
+        <member name="T:FivePD.API.Callout">
+            <summary>
+            Implement this abstract class to make your own callout. This class defines the main callout structure as well as some basic helper methods.
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.AssignedPlayers">
+            <summary>
+            The list of players that has accepted the callout
+            NOTE: The base player is always going to be added by default
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.CalloutDescription">
+            <summary>
+            The description of the callout that will be displayed in the computer (Detailed)
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.ShortName">
+            <summary>
+            The shortname of the callout that will be displayed on the notification's header (eg. Trespassing)
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.CaseID">
+            <summary>
+            DON'T EDIT! CaseID will be automatically generated
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.ResponseCode">
+            <summary>
+            Response Code (eg. 1,2,3,...)
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.StartDistance">
+            <summary>
+            The distance that the distance checker will use to detemine whether the player is in range and start the callout 
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.Location">
+            <summary>
+            Location of the callout. This position will be marked on the map and set as a waypoint for the player
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.Marker">
+            <summary>
+            The blip will be created over the `Location`
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Callout.Identifier">
+            <summary>
+            Do not set it! It'll be used as a unique identifier by CalloutManager when creating a call
+            </summary>
+        </member>
+        <member name="P:FivePD.API.Callout.Started">
+            <summary>
+            It'll be set to true once the callout starts ( the player gets in range ).<br/>
+            It is mainly used by the callout manager to determine whether to reward a player or not
+            </summary>
+        </member>
+        <member name="P:FivePD.API.Callout.FixedLocation">
+            <summary>
+            Marks whether the callout spawns at the same location (not random)
+            If it is set to true, only 1 player can receive this call at the same time (meaning that it won't show up for others till the player completes the call)
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Callout.SpawnPed(CitizenFX.Core.PedHash,CitizenFX.Core.Vector3,System.Single)">
+            <summary>
+            Spawn a properly networked pedestrian that is also marked as mission entity. Since this method will also load in the model, this call must be awaited.
+            </summary>
+            <param name="pedHash">The <see cref="T:CitizenFX.Core.PedHash"/> that you want to spawn.</param>
+            <param name="location">The location of the ped.</param>
+            <param name="heading">Which direction the ped is facing.</param>
+            <returns></returns>
+        </member>
+        <member name="M:FivePD.API.Callout.SpawnVehicle(CitizenFX.Core.VehicleHash,CitizenFX.Core.Vector3,System.Single)">
+            <summary>
+            Spawn a properly networked vehicle that is also marked as mission entity. Since this method will also load in the model, this call must be awaited.
+            </summary>
+            <param name="vehicleHash">The <see cref="T:CitizenFX.Core.VehicleHash"/> of the vehicle that you want to spawn.</param>
+            <param name="location">The location of the vehicle.</param>
+            <param name="heading">Which direction the vehicle is facing.</param>
+            <returns>The vehicle you spawned</returns>
+        </member>
+        <member name="M:FivePD.API.Callout.GetRandomPed">
+            <summary>
+            Select a random <see cref="T:CitizenFX.Core.PedHash"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FivePD.API.Callout.InitInfo(CitizenFX.Core.Vector3)">
+            <summary>
+            Initialize callout information. Call this in your callout constructor.
+            </summary>
+            <param name="location">The location for your callout.</param>
+        </member>
+        <member name="M:FivePD.API.Callout.InitBlip(System.Single,CitizenFX.Core.BlipColor,CitizenFX.Core.BlipSprite,System.Int32)">
+            <summary>
+            OnAccept will be called when the player accepts the call.
+            You must call base.OnAccept(args) to initialise the default properties
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Callout.OnAccept">
+            <summary>
+            OnAccept() will be automatically invoked by the CalloutManager<br/>
+            Define game logic here (eg. Spawn suspects,victims,vehicles)
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Callout.OnStart(CitizenFX.Core.Ped)">
+            <summary>
+            (Do not call it)<br/><br/>
+            Destructs every spawned object automatically if defined as a field or property (can be public, private, protected and static)<br/>
+            To spawn something, define it as a property or field, otherwise you'll manually have to delete it locally.<br />
+            See the documentation.
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Callout.OnBackupCalled(System.Int32)">
+            <summary>
+            Called when backup is requested through the Callout menu.
+            </summary>
+            <param name="code">The code of the backup. Either 1, 2, 3 or 99.</param>
+        </member>
+        <member name="M:FivePD.API.Callout.OnBackupReceived(CitizenFX.Core.Player)">
+            <summary>
+            Called when a player has accepted the backup request and is added to the call.
+            </summary>
+            <param name="player">The player that was added to the call.</param>
+        </member>
+        <member name="M:FivePD.API.Callout.OnPlayerRevokedBackup(CitizenFX.Core.Player)">
+            <summary>
+            Called when a player that was on the call has canceled the assistance (left the call).
+            </summary>
+            <param name="player">The player that has left the call.</param>
+        </member>
+        <member name="M:FivePD.API.Callout.OnCancelBefore">
+            <summary>
+            Called before the callout is cleaned up (before Destruct()).
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Callout.OnCancelAfter">
+            <summary>
+            Called after the callout is cleaned up.
+            </summary>
+        </member>
+        <member name="P:FivePD.API.Callout.EndCallout">
+            <summary>
+            EndCallout() should be called when you want to terminate or end the callout.<br /><br />
+            You should have conditions with your logic when you want to end your callout (Eg. when the player goes to a certain point on the map, ...)<br />
+            Calling this method will automatically mark it as a completed callout<br />
+            If you don't call this method, the user will have to manually cancel the callout.<br /><br />
+            Called methods after calling EndCallout() method:<br />
+            - OnCancelBefore()<br />
+            - OnCancelAfter()
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Callout.CheckRequirements">
+            <summary>
+            This method allows you to influence whether this callout is currently allowed to initialize or not.
+            Return <c>true</c> to enable the callout, <c>false</c> to disable.<br /><br />
+            <example>
+            In the following example, the callout will only appear during the night (from midnight to 6AM).
+            <code>
+            public override Task&lt;bool&gt; CheckRequirements() => Task.FromResult(World.CurrentDateTime &lt;= TimeSpan.FromHours(6));
+            </code>
+            </example>
+            </summary>
+            <returns>True to enable, false to disable.</returns>
+        </member>
+        <member name="M:FivePD.API.Callout.ReceiveTick">
+            <summary>
+            Receive Tick from the callout manager.
+            To subscribe to ticks, please use the <see cref="E:FivePD.API.Callout.Tick"/> event.
+            </summary>
+            <returns></returns>
+            <seealso cref="E:FivePD.API.Callout.Tick"/>
+        </member>
+        <member name="E:FivePD.API.Callout.Tick">
+            <summary>
+            Subscribe to the tick event to process callout logic.
+            <example>
+            In order to subscribe to the event, register an event handler:
+            <code>
+            public override void OnStart(Ped closest)
+            {
+                Tick += OnTick;
+            }
+            </code>
+            Then, define your event handler. In this event handler you can write your logic.
+            <code>
+            public async Task OnTick()
+            {
+                Debug.WriteLine("A tick!");
+                
+                await BaseScript.Delay(1500);
+            }
+            </code>
+            In this example you would see "A tick!" appearing in the console (F8) every 1,5 seconds. Make sure to call BaseScript.Delay!
+            </example>
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities">
+            <summary>
+            FivePD Utilities class
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.Services">
+            <summary>
+            An enum of FivePD services
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.Ambulance">
+            <summary>
+            Ambulance service
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.AirAmbulance">
+            <summary>
+            Air ambulance service
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.FireDept">
+            <summary>
+            Fire department service
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.Coroner">
+            <summary>
+            Coroner service
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.AnimalControl">
+            <summary>
+            Animal control service
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.TowTruck">
+            <summary>
+            Tow truck service
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.Mechanic">
+            <summary>
+            Mechanic service
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.Services.PrisonTransport">
+            <summary>
+            Prison transport service
+            </summary>
+        </member>
+        <member name="P:FivePD.API.Utilities.UnsupportedPedHashes">
+            <summary>
+            A list of PedHashes that do not work with FivePD.
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.EnableModDelegate">
+            <summary>
+            EnableModDelegate is a method reference with zero parameter
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.EnableMod">
+            <summary>
+            <para>Enables the mod for the local player. Can be useful for integrating other resources.</para>
+            <para>Should only be used in Plugins.</para>
+            <para>Can be called dynamically. (Allows you to toggle)</para>
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.DisableModDelegate">
+            <summary>
+            DisableModDelegate is a method reference with zero parameter
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.DisableMod">
+            <summary>
+            <para>Disables the mod for the local player. Can be useful for integrating other resources.</para>
+            <para> Should only be used in Plugins.</para>
+            <para>Can be called dynamically. (Allows you to toggle)</para>
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.ForceCalloutDelegate">
+            <summary>
+            
+            </summary>
+            <param name="guid"></param>
+        </member>
+        <member name="F:FivePD.API.Utilities.ForceCallout">
+            <summary>
+            Forces a callout with the given GUID or name (eg. Trespassing).
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.GetCurrentCalloutDelegate">
+            <summary>
+            GetCurrentCalloutDelegate is a method reference with zero parameter and with return type of `Callout`
+            </summary>
+            <returns>Callout object</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetCurrentCallout">
+            <summary>
+            Returns the current ongoing callout.
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.GetCalloutsDelegate">
+            <summary>
+            GetCalloutsDelegate is a method reference with zero parameter and with return type of `List`
+            </summary>
+            <returns>A list of callout names</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetCallouts">
+            <summary>
+            Returns a List with every enabled callout.
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.GetVehicleDataDelegate">
+            <summary>
+             SetVehicleDataDelegate is a method reference with an int (vehicle) and VehicleData (data) parameters and with return type of `Task`
+            </summary>
+            <param name="networkID">The network id of the vehicle</param>
+            <returns>(awaitable) VehicleData object</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetVehicleData">
+            <summary>
+            Returns a VehicleData object that is associated with the given vehicle (net id)
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.SetVehicleDataDelegate">
+            <summary>
+            SetVehicleDataDelegate is a method reference with an int (vehicle) and VehicleData (data) parameters
+            </summary>
+            <param name="vehicle">The network id of the vehicle</param>
+            <param name="data">A VehicleData object</param>
+        </member>
+        <member name="F:FivePD.API.Utilities.SetVehicleData">
+            <summary>
+            Sets vehicle related data
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.ExcludeVehicleFromTrafficStopDelegate">
+            <summary>
+            ExcludeVehicleFromTrafficStopDelegate is a method reference with an int (networkID) and bool (exclude) parameters
+            </summary>
+            <param name="networkID">The network ID of the vehicle</param>
+            <param name="exclude">Enable/Disable traffic stop functions</param>
+        </member>
+        <member name="F:FivePD.API.Utilities.ExcludeVehicleFromTrafficStop">
+            <summary>
+            Enables/Disables traffic stop functions on a vehicle (with the given network id)
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.RequestService">
+            <summary>
+            Requests a service to a given position.
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.CancelService">
+            <summary>
+            Cancels the last requested service (by service type).
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.IsPlayerPerformingTrafficStopDelegate">
+            <summary>
+            IsPlayerPerformingTrafficStopDelegate is a method reference with zero parameter and with return type of `bool`
+            </summary>
+            <returns>Whether the local player is performing a traffic stop or not</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.IsPlayerPerformingTrafficStop">
+            <summary>
+            Returns whether the local player is in a traffic stop or not
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.GetVehicleFromTrafficStopDelegate">
+            <summary>
+            GetVehicleFromTrafficStopDelegate is a method reference with zero parameter and with return type of `Vehicle`
+            </summary>
+            <returns>The vehicle from the traffic stop</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetVehicleFromTrafficStop">
+            <summary>
+            Returns the pulled over vehicle
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.GetDriverFromTrafficStopDelegate">
+            <summary>
+            GetDriverFromTrafficStopDelegate is a method reference with zero parameter and with return type of `Ped`
+            </summary>
+            <returns>The driver ped of the pulled over vehicle</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetDriverFromTrafficStop">
+            <summary>
+            Returns the driver ped from of pulled over vehicle
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.GetPassengersFromTrafficStopDelegate">
+            <summary>
+            GetPassengersFromTrafficStopDelegate is a method reference with zero parameter and with return type of `Ped[]`
+            </summary>
+            <returns>An array of passenger peds from the pulled over vehicle (driver ped will not be added into the array)</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetPassengersFromTrafficStop">
+            <summary>
+            Returns an array of passenger peds of the pulled over vehicle.
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetPedData">
+            <summary>
+            Retrieve internal FivePD information about a specific pedestrian.
+            Use the method inside of the <see cref="!:Init"/> or <see cref="!:OnStart"/> methods or in an external script.<br /><br />
+            The following properties can be accessed:<br />
+            	- Firstname (string) <br />
+            	- Lastname (string) <br />
+            	- Warrant (string) <br />
+            	- License (string) <br />
+            	- DOB (string) -> format: <c>mm/dd/yyyy</c><br />
+            	- AlcoholLevel (double) <br /> 
+            	- DrugsUsed (bool []) -> 0 = Meth, 1 = Cocaine, 2 = Marijuana<br />
+            	- Gender (string) <br />
+            	- Age (int) <br />
+            	- Address (string) <br />
+            	- Items (List&lt;dynamic&gt;) <br />
+            	- Violations (List&lt;dynamic&gt;)
+            <example>
+            <code>dynamic myData = await GetPedData(myPed.NetworkId);</code>
+            </example>
+            </summary>
+            <param name="NetworkID">The network ID of the pedestrian that you're trying to get the data from.</param>
+            <returns></returns>
+        </member>
+        <member name="T:FivePD.API.Utilities.SetPedDelegate">
+            <summary>
+            
+            </summary>
+            <param name="NetworkID">The network id of the given entity</param>
+            <param name="PedData">The PedData instance containing custom properties.</param>
+             /// <seealso cref="T:FivePD.API.Utils.PedData"/>
+        </member>
+        <member name="F:FivePD.API.Utilities.SetPedData">
+            <summary>
+            Sets information for the given ped.
+            Use the method inside of the <see cref="!:Init"/> or <see cref="!:OnStart"/> methods or in an external script.<br /><br />
+            <example>
+            <code>
+            PedData myData = new PedData();<br />
+            myData.FirstName = "John";<br />
+            myData.LastName = "Doe";<br />
+            myData.AlcoholLevel = 0.20;<br />
+            myData.DrugsUsed = new Drugs[] { Drugs.Meth }; <br />
+            myData.Items = new List&lt;Item&gt; { new Item { Name = "knife", IsIllegal = true } }; <br />
+            SetPedData(myPed.NetworkId, myData);
+            ...
+            or
+            ...
+            Ped ped;
+            ped.SetData(); // Extension method
+            </code>
+            </example>
+            </summary>
+            <param name="NetworkID">The network id of the pedestrian.</param>
+            <param name="PedData">The PedData instance containing custom properties.</param>
+            <seealso cref="T:FivePD.API.Utils.PedData"/>
+        </member>
+        <member name="F:FivePD.API.Utilities.SpawnPed">
+            <summary>
+            Requests the server to spawn a ped with the given parameters.
+            </summary>
+            <param name="model">Model</param>
+            <param name="position">Position</param>
+            <param name="heading">Heading</param>
+            <returns>Task</returns>
+            <seealso cref="T:FivePD.API.Utilities.SpawnPedDelegate"/>
+        </member>
+        <member name="F:FivePD.API.Utilities.SpawnVehicle">
+            <summary>
+            Requests the server to spawn a vehicle with the given parameters.
+            </summary>
+            <param name="model">Model</param>
+            <param name="position">Position</param>
+            <param name="heading">Heading</param>
+            <returns>Task</returns>
+            <seealso cref="T:FivePD.API.Utilities.SpawnVehicleDelegate"/>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetPlayerData">
+            <summary>
+            <para>Call GetPlayerData() if you want to access the PlayerData object. </para>
+            <para>Please note that you cannot call this method in the constructor of your callout. </para>
+            <para>Use the method inside of the <see cref="!:Init"/> or <see cref="!:OnStart"/> methods.</para>
+            <para>The following properties can be accessed in the PlayerData:</para>
+                 - DisplayName (string) <br />
+                 - Callsign (string) <br />
+                 - Department (string)  <br />
+                 - DepartmentID (int)  <br />
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.IsPlayerOnDutyDelegate">
+            <summary>
+            IsPlayerOnDutyDelegate is a method reference with zero parameter
+            </summary>
+            <returns>Whether the local player is on duty</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.IsPlayerOnDuty">
+            <summary>
+            Returns whether the local player is on duty
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.SetPlayerDutyDelegate">
+            <summary>
+            SetPlayerDutyDelegate is a method reference with a bool (onDuty) parameter
+            </summary>
+            <param name="onDuty">On/Off</param>
+        </member>
+        <member name="F:FivePD.API.Utilities.SetPlayerDuty">
+            <summary>
+            Sets duty status of the local player (on/off)
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.SyncBlipDelegate">
+            <summary>
+            SyncBlipDelegate is a method reference with a Blip (blip) parameter
+            </summary>
+            <param name="blip">Blip to sync</param>
+        </member>
+        <member name="F:FivePD.API.Utilities.SyncBlip">
+            <summary>
+            Syncs the given blip with other players
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.SyncBlipWithRadiusDelegate">
+            <summary>
+            SyncBlipWithRadiusDelegate is a method reference with a Blip (blip) and float (radius) parameters
+            </summary>
+            <param name="blip">Blip to sync</param>
+            <param name="radius">radius of the blip</param>
+        </member>
+        <member name="F:FivePD.API.Utilities.SyncBlipWithRadius">
+            <summary>
+            Syncs the given blip (with radius) with other players
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.SyncBlipDeleteDelegate">
+            <summary>
+            
+            </summary>
+            <param name="blip"></param>
+        </member>
+        <member name="F:FivePD.API.Utilities.SyncBlipDelete">
+            <summary>
+            Deletes the previously synced blip object (globally)
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.SetPlayerDataFlags">
+            <summary>
+            <para>SetPlayerDataFlags is an enum that contains every possible option that you can use to set player data</para>
+            <para>Use `-1` as the department id if you want to kick a player from the player's current department</para>
+            </summary>
+        </member>
+        <member name="T:FivePD.API.Utilities.SetPlayerDataDelegate">
+            <summary>
+            SetPlayerDataDelegate is a method reference with a PlayerData (playerData) and SetPlayerDataFlags (flags) parameters and with return type of `Task`
+            </summary>
+            <param name="playerData">The player data object</param>
+            <param name="flags">Flags</param>
+            <returns>(awaitable) Task</returns>
+        </member>
+        <member name="F:FivePD.API.Utilities.SetPlayerData">
+            <summary>
+            Sets player related data (persistent)
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utilities.GetClosestPed(CitizenFX.Core.Ped)">
+            <summary>
+            Returns the closest ped.
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utilities.GetRandomPosInPlayerDepartmentArea">
+            <summary>
+            Returns a random position in the player's department area.
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.EnumExtensions.EnumAsEnumerable``1">
+            <summary>
+            Get all values of <typeparamref name="TEnum"/> in an iterable collection.
+            </summary>
+            <typeparam name="TEnum">The type of the enum</typeparam>
+        </member>
+        <member name="M:FivePD.API.Utils.ListExtensions.SelectRandom``1(System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Retrieve a random element from the provided list.
+            </summary>
+            <param name="enumerable">The collection of elements.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.ListExtensions.SelectRandom``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Retrieve a random element from the provided list.
+            </summary>
+            <param name="enumerable">The collection of elements.</param>
+            <param name="exclusions">The elements you don't want to include in the result.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.ListExtensions.SelectRandom``1(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Retrieve a random element from the provided list (with exceptions).
+            </summary>
+            <param name="enumerable">The collection of elements.</param>
+            <param name="skip">The amount of elements at the beginning of the collection to skip.</param>
+            <param name="exclusions">The elements you don't want to include in the result.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.ListExtensions.SelectRandom``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Retrieve a random element from the provided list, allowing you to skip the specified number of elements from the start.
+            </summary>
+            <param name="enumerable">The collection of elements.</param>
+            <param name="skip">The amount of elements at the beginning of the collection to skip.</param>
+        </member>
+        <member name="T:FivePD.API.Utils.RandomUtils">
+            <summary>
+            A collection of utilities that make it easier to select or generate random values.
+            </summary>
+        </member>
+        <member name="F:FivePD.API.Utils.RandomUtils.Random">
+            <summary>
+            Random instance that you can use to get random values in your callouts. This random should generate better
+            random numbers than when you create your own randoms in code. Also have a look at the <see cref="M:FivePD.API.Utils.RandomUtils.GetRandomNumber(System.Int32,System.Int32)"/> method.
+            </summary>
+        </member>
+        <member name="P:FivePD.API.Utils.RandomUtils.PedHashes">
+            <summary>
+            A list of all entries in the <see cref="T:CitizenFX.Core.PedHash"/> enum, minus the ones that break FivePD.
+            </summary>
+        </member>
+        <member name="P:FivePD.API.Utils.RandomUtils.WeaponHashes">
+            <summary>
+            A list of all entries in the <see cref="T:CitizenFX.Core.WeaponHash"/> enum.
+            </summary>
+        </member>
+        <member name="P:FivePD.API.Utils.RandomUtils.VehicleHashes">
+            <summary>
+            A list of all entries in the <see cref="T:CitizenFX.Core.VehicleHash"/> enum.
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomNumber(System.Int32,System.Int32)">
+            <summary>
+            Select a random number in the specified range. <paramref name="start"/> is inclusive, <paramref name="end"/> exclusive
+            (so the number that is passed for <paramref name="start"/> can also be returned, but <paramref name="end"/> cannot).<br /><br />
+            <example>
+            To generate an inclusive number between 1 and 100, you would use the following code:
+            <code>
+            var myRandomNumber = GetRandomNumber(1, 101);
+            </code>
+            </example>
+            </summary>
+            <param name="start">The inclusive minimum value</param>
+            <param name="end">The exclusive maximum value.</param>
+            <returns>A number between <paramref name="start"/> and <paramref name="end"/> (could be equal to <paramref name="start"/>)</returns>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomPed">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.PedHash"/>.
+            By default, this method will already exclude all skins that are incompatible with FivePD.
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomPed(System.Collections.Generic.IEnumerable{CitizenFX.Core.PedHash})">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.PedHash"/>. Entries in the exclusion list will be ignored. 
+            By default, this method will already exclude all skins that are incompatible with FivePD.
+            </summary>
+            <param name="exclusions">The list of <see cref="T:CitizenFX.Core.PedHash"/> to ignore.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomWeapon">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.WeaponHash"/>.
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomWeapon(System.Collections.Generic.IEnumerable{CitizenFX.Core.WeaponHash})">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.WeaponHash"/>. Entries in the exclusion list will be ignored.
+            </summary>
+            <param name="exclusions">The list of <see cref="T:CitizenFX.Core.WeaponHash"/> to ignore.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomVehicle">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.VehicleHash"/>.
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomVehicle(System.Collections.Generic.IEnumerable{CitizenFX.Core.VehicleHash})">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.VehicleHash"/>. Entries in the exclusion list will be ignored.
+            </summary>
+            <param name="exclusions">The list of <see cref="T:CitizenFX.Core.VehicleHash"/> to ignore.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomVehicle(CitizenFX.Core.VehicleClass)">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.VehicleHash"/> from the given vehicle class.
+            </summary>
+            <param name="vehicleClass">The class of vehicles you wish to select a random hash from.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomVehicle(CitizenFX.Core.VehicleClass[])">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.VehicleHash"/> from the given vehicle classes.
+            </summary>
+            <param name="vehicleClasses">The classes of vehicles you wish to select a random hash from.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetRandomVehicle(System.Collections.Generic.IEnumerable{CitizenFX.Core.VehicleClass})">
+            <summary>
+            Get a random <see cref="T:CitizenFX.Core.VehicleHash"/> from the given vehicle classes.
+            </summary>
+            <param name="vehicleClasses">The classes of vehicles you wish to select a random hash from.</param>
+        </member>
+        <member name="M:FivePD.API.Utils.RandomUtils.GetVehicleHashesForClass(CitizenFX.Core.VehicleClass)">
+            <summary>
+            Retrieve all the <see cref="T:CitizenFX.Core.VehicleHash"/>es from a given <see cref="T:CitizenFX.Core.VehicleClass"/>.
+            </summary>
+            <param name="vehicleClass">The class of vehicles.</param>
+        </member>
+        <member name="T:FivePD.API.Utils.Vector3Extension">
+            <summary>
+            Adds some handy extensions to Vectors
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.Around(CitizenFX.Core.Vector3,System.Single)">
+            <summary>
+            Returns a random Vector3 relative to the specified position, given a set radius as distance
+            </summary>
+            Made by LukeD (Thank you!)
+            <param name="pos"></param>
+            <param name="radius"></param>
+            <returns></returns>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.RandomXy">
+            <summary>
+            Returns a normalized Vector3 given randomized X and Y coordinates
+            </summary>
+            Made by LukeD (Thank you!)
+            <returns></returns>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.DistanceTo(CitizenFX.Core.Vector3,CitizenFX.Core.Vector3)">
+            <summary>
+            Returns the distance between this position the provided position
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.ApplyOffset(CitizenFX.Core.Vector3,CitizenFX.Core.Vector3)">
+            <summary>
+            Returns the provided offset added to this position
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.GroundHeight(CitizenFX.Core.Vector3)">
+            <summary>
+            Returns the height of the ground at this position
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.ClosestStreetName(CitizenFX.Core.Vector3)">
+            <summary>
+            Returns the street name at this position
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.SetWaypointHere(CitizenFX.Core.Vector3)">
+            <summary>
+            Sets the player's waypoint to this position
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.ClosestPedPlacement(CitizenFX.Core.Vector3)">
+            <summary>
+            Returns the closest location relative to this position, that a ped can be placed on the side walk
+            </summary>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.ClosestParkedCarPlacement(CitizenFX.Core.Vector3,System.Boolean)">
+            <summary>
+            Returns the closest location relative to this position, a car can be placed on the side of the road
+            </summary>
+            <param name="unoccupied">If true, only unoccupied spots will be searched</param>
+        </member>
+        <member name="M:FivePD.API.Utils.Vector3Extension.GetClosestParkedCar(CitizenFX.Core.Vector3)">
+            <summary>
+            Returns the closest parked car relative to this position
+            </summary>
+        </member>
+    </members>
+</doc>

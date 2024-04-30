@@ -1,0 +1,55 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\repos\\CalloutTemplate\\CalloutTemplate.csproj": {}
+  },
+  "projects": {
+    "D:\\repos\\CalloutTemplate\\CalloutTemplate.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\repos\\CalloutTemplate\\CalloutTemplate.csproj",
+        "projectName": "CalloutTemplate.net",
+        "projectPath": "D:\\repos\\CalloutTemplate\\CalloutTemplate.csproj",
+        "packagesPath": "C:\\Users\\lukni\\.nuget\\packages\\",
+        "outputPath": "D:\\repos\\CalloutTemplate\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\lukni\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net452"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net452": {
+            "targetAlias": "net452",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net452": {
+          "targetAlias": "net452",
+          "dependencies": {
+            "FivePD.net": {
+              "target": "Package",
+              "version": "[1.3.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
