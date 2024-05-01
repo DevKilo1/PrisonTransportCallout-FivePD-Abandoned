@@ -4,12 +4,13 @@ using CitizenFX.Core;
 using FivePD.API;
 using Kilo.Commons.Utils;
 
-namespace CalloutTemplate
+namespace Callouts
 {
-    public class CalloutName : Callout
+    public class PrisonTransport : Callout
     {
-        public CalloutName()
+        public PrisonTransport()
         {
+            Utils.Draw3DText(Vector3.Zero, "");
             ShortName = "CalloutName";
             CalloutDescription = "";
             StartDistance = 120f;

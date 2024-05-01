@@ -1,0 +1,14 @@
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.csproj.AssemblyReference.cache
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.GeneratedMSBuildEditorConfig.editorconfig
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.AssemblyInfoInputs.cache
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.AssemblyInfo.cs
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.csproj.CoreCompileInputs.cache
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.sourcelink.json
+D:\repos\CalloutTemplate\bin\Debug\net452\CalloutTemplate.net.dll
+D:\repos\CalloutTemplate\bin\Debug\net452\CalloutTemplate.net.pdb
+D:\repos\CalloutTemplate\bin\Debug\net452\CitizenFX.Core.Client.dll
+D:\repos\CalloutTemplate\bin\Debug\net452\FivePD.net.dll
+D:\repos\CalloutTemplate\bin\Debug\net452\Newtonsoft.Json.dll
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.csproj.CopyComplete
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.net.dll
+D:\repos\CalloutTemplate\obj\Debug\net452\CalloutTemplate.net.pdb
