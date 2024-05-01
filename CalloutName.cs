@@ -16,19 +16,18 @@ namespace CalloutTemplate
             ResponseCode = 3;
         }
 
-        public override Task OnAccept()
+        public async override Task OnAccept()
         {
-            return base.OnAccept();
+            
         }
         
         public override void OnStart(Ped closest)
         {
-            base.OnStart(closest);
         }
 
         public override void OnCancelBefore()
         {
-            base.OnCancelBefore();
+           
         }
     }
 }
