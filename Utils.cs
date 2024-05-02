@@ -25,23 +25,167 @@ namespace Kilo.Commons.Utils
         public static JObject config;
         public static Dictionary<int, Marker> markers = new Dictionary<int, Marker>();
 
+        public class Waypoint
+        {
+            public Vector3 Position
+            {
+                get { return _position; }
+            }
+
+            public Entity Target
+            {
+                get { return _entity; }
+            }
+
+            public float Distance
+            {
+                get { return _distance; }
+            }
+
+            private bool _arrived = false;
+            private float _distance;
+            private float _bufferDistance;
+            private Vector3 _position;
+            private Entity _entity;
+            private int _refreshInterval;
+            private Marker _visualMarker;
+            private float _runDistance = 10f;
+            public float RunDistance
+            {
+                get { return _runDistance; }
+            }
+
+            public float DrivingSpeed
+            {
+                get { return _drivingSpeed; }
+            }
+            private float _drivingSpeed = 20f;
+
+            private int _timeout;
+            
+            public Waypoint(Vector3 position, Entity entityToTrack, int timeout = 100, float bufferDistance = 0.1f,
+                int refreshInterval = 100)
+            {
+                _position = position;
+                _entity = entityToTrack;
+                _bufferDistance = bufferDistance;
+                _refreshInterval = refreshInterval;
+                _timeout = timeout;
+                UpdateData();
+            }
+
+            private GoToType CalculateGoToType()
+            {
+                GoToType goToType = GoToType.Run;
+                if (_distance < RunDistance)
+                {
+                    goToType = GoToType.Walk;
+                }
+                return goToType;
+            }
+
+            public async Task Start(float drivingSpeed = -1f)
+            {
+                await BaseScript.Delay(_timeout);
+                if (!Target.Model.IsValid) return;
+                if (Target.Model.IsPed)
+                {
+                    var ped = (Ped)Target;
+                    KeepTaskGoToForPed(ped, Position, _bufferDistance, CalculateGoToType());
+                } else if (Target.Model.IsVehicle)
+                {
+                    if (drivingSpeed != -1f)
+                        _drivingSpeed = drivingSpeed;
+                    Drive();
+                }
+            }
+
+            private void Drive()
+            {
+                var veh = (Vehicle)Target;
+                if (veh.Driver == null) throw new Exception("Vehicle needs a driver in order to start drive!");
+                var driver = veh.Driver;
+                driver.Task.DriveTo(veh, Position, _bufferDistance, _drivingSpeed);
+            }
+
+            public void SetDrivingSpeed(float speed)
+            {
+                _drivingSpeed = speed;
+                Drive();
+            }
+            
+            public void SetRunDistance(float distance)
+            {
+                _runDistance = distance;
+            }
+
+            private async Task UpdateData()
+            {
+                while (!_arrived)
+                {
+                    _distance = Target.Position.DistanceTo(Position);
+                    _arrived = _distance <= _bufferDistance;
+                    await BaseScript.Delay(_refreshInterval);
+                }
+            }
+
+            public void Mark(MarkerType markerType)
+            {
+                if (_visualMarker != null)
+                    throw new Exception("Marker already exists!");
+
+                _visualMarker = new Marker(markerType, MarkerAttachTo.Position, Position);
+                _visualMarker.SetVisiblility(true);
+            }
+
+            public void Unmark()
+            {
+                if (_visualMarker == null)
+                    throw new Exception("Marker does not exist!");
+                _visualMarker.Dispose();
+            }
+
+            public async Task Wait()
+            {
+                while (!_arrived)
+                {
+                    await BaseScript.Delay(_refreshInterval);
+                }
+
+                if (Target.Model.IsVehicle)
+                {
+                    var veh = (Vehicle)Target;
+                    var ped = veh.Driver;
+                    ped.Task.ClearAll();
+                }
+                else
+                {
+                    var ped = (Ped)Target;
+                    ped.Task.ClearAll();
+                }
+            }
+        }
+
         public enum MarkerAttachTo
         {
             Entity,
             Position
         }
+
         public class Marker
         {
             public int Handle;
+
             public bool Enabled
             {
                 get { return _enabled; }
             }
-            
+
             private bool _enabled = true;
             private bool destroyed = false;
             private MarkerType _markerType;
             private Vector3 _pos;
+
             public Marker(MarkerType markerType, MarkerAttachTo markerAttachTo, Vector3 pos, Entity entity = null)
             {
                 _markerType = markerType;
@@ -52,7 +196,7 @@ namespace Kilo.Commons.Utils
                     if (entity == null) throw new Exception("You need to provide a valid entity to attach to!");
                     AttachPositionToEntity(entity, pos);
                 }
-                
+
                 SetHandle();
                 Create();
             }
@@ -79,13 +223,14 @@ namespace Kilo.Commons.Utils
                 {
                     if (Enabled)
                     {
-                        World.DrawMarker(_markerType,_pos, Vector3.Zero, Vector3.Zero, Vector3.One, Color.Aqua);
+                        World.DrawMarker(_markerType, _pos, Vector3.Zero, Vector3.Zero, Vector3.One, Color.Aqua);
                     }
+
                     await BaseScript.Delay(0);
                 }
             }
 
-            public void Destroy()
+            public void Dispose()
             {
                 destroyed = true;
                 _enabled = false;
@@ -99,6 +244,7 @@ namespace Kilo.Commons.Utils
                     _handle = new Random().Next();
                     await BaseScript.Delay(0);
                 }
+
                 Handle = _handle;
             }
         }
@@ -106,7 +252,7 @@ namespace Kilo.Commons.Utils
         public static async Task<string> DoOnScreenKeyboard()
         {
             string text = "";
-            
+
             API.DisplayOnscreenKeyboard(0, "FMMC_KEY_TIP8", "", "", "", "", "", 60);
             while (API.UpdateOnscreenKeyboard() == 0)
             {
@@ -118,16 +264,20 @@ namespace Kilo.Commons.Utils
             text = API.GetOnscreenKeyboardResult();
             return text;
         }
-        
-        public static void ShowNetworkedNotification(string text, string sender = "~f~Dispatch", string subject = "~m~ Callout Update", string txdict = "CHAR_CALL911", string txname = "CHAR_CALL911", int iconType = 4, int backgroundColor = -1, bool flash = false, bool isImportant = false, bool saveToBrief = false)
-                {
-                    API.BeginTextCommandThefeedPost("STRING");
-                    API.AddTextComponentSubstringPlayerName(text);
-                    if (backgroundColor > -1)
-                        API.ThefeedNextPostBackgroundColor(backgroundColor); // https://docs.fivem.net/docs/game-references/hud-colors/
-                    API.EndTextCommandThefeedPostMessagetext(txdict, txname, flash, iconType, sender, subject);
-                    API.EndTextCommandThefeedPostTicker(isImportant, saveToBrief);
-                }
+
+        public static void ShowNetworkedNotification(string text, string sender = "~f~Dispatch",
+            string subject = "~m~ Callout Update", string txdict = "CHAR_CALL911", string txname = "CHAR_CALL911",
+            int iconType = 4, int backgroundColor = -1, bool flash = false, bool isImportant = false,
+            bool saveToBrief = false)
+        {
+            API.BeginTextCommandThefeedPost("STRING");
+            API.AddTextComponentSubstringPlayerName(text);
+            if (backgroundColor > -1)
+                API.ThefeedNextPostBackgroundColor(
+                    backgroundColor); // https://docs.fivem.net/docs/game-references/hud-colors/
+            API.EndTextCommandThefeedPostMessagetext(txdict, txname, flash, iconType, sender, subject);
+            API.EndTextCommandThefeedPostTicker(isImportant, saveToBrief);
+        }
 
         public static void ShowNotification(string text)
         {
@@ -135,7 +285,7 @@ namespace Kilo.Commons.Utils
             API.AddTextComponentString(text);
             API.DisplayHelpTextFromStringLabel(0, false, true, -1);
         }
-        
+
         public static List<string> animDictsLoaded = new List<string>();
         public static List<string> animSetsLoaded = new List<string>();
 
@@ -173,6 +323,7 @@ namespace Kilo.Commons.Utils
         {
             public bool IsActive = true;
             private Dictionary<int, Action> connected = new Dictionary<int, Action>();
+
             public DecisionInteraction(string[] choices)
             {
                 if (!IsActive) return;
@@ -190,13 +341,13 @@ namespace Kilo.Commons.Utils
             public void Connect(int index, Action function)
             {
                 if (!IsActive) return;
-                
+
                 if (!connected.ContainsKey(index))
                 {
                     connected.Add(index, function);
                 }
             }
-            
+
 
             private async Task ShowInteractionDecision(string[] choices)
             {
@@ -208,9 +359,11 @@ namespace Kilo.Commons.Utils
                     displaying2DText.Add(line);
                     Draw2DHandler(line);
                 }
+
                 displayingDecision = true;
                 HandleInteractButton();
             }
+
             private async Task HandleInteractButton()
             {
                 while (displayingDecision)
@@ -245,8 +398,9 @@ namespace Kilo.Commons.Utils
                             if (currentselected <= 0)
                                 currentselected = displaying2DText.Count - 1;
                             else
-                                currentselected--;    
+                                currentselected--;
                         }
+
                         await BaseScript.Delay(100);
                     }
 
@@ -261,7 +415,7 @@ namespace Kilo.Commons.Utils
                             //Debug.WriteLine("Should be running");
                         }
                     }
-                
+
                     await BaseScript.Delay(0);
                 }
             }
@@ -272,14 +426,12 @@ namespace Kilo.Commons.Utils
             }
         }
 
-        
-        
 
         public static async Task Remove2D(string text)
         {
             displaying2DText.Remove(text);
         }
-        
+
         public static async Task Draw2DHandler(string text)
         {
             Vector2 pos = decisionUIPos;
@@ -291,10 +443,10 @@ namespace Kilo.Commons.Utils
                 if (i < index)
                     pos += new Vector2(0f, 0.03f);
             }
-            
+
             Draw2D(text, pos);
         }
-        
+
         public static async Task Draw2D(string text, Vector2 pos)
         {
             while (displaying2DText.Contains(text))
@@ -308,16 +460,17 @@ namespace Kilo.Commons.Utils
                         API.SetTextColour(255, 255, 255, 255);
                     else
                         API.SetTextColour(255, 255, 255, 100);
-                
-                    API.SetTextDropshadow(0, 0, 0, 0, 255); 
+
+                    API.SetTextDropshadow(0, 0, 0, 0, 255);
                     API.SetTextEdge(2, 0, 0, 0, 150);
                     API.SetTextDropShadow();
                     API.SetTextOutline();
                     API.SetTextEntry("STRING");
                     API.SetTextCentre(true);
                     API.AddTextComponentString(text);
-                    API.DrawText(pos.X, pos.Y);   
+                    API.DrawText(pos.X, pos.Y);
                 }
+
                 await BaseScript.Delay(0);
             }
         }
@@ -342,7 +495,7 @@ namespace Kilo.Commons.Utils
             foreach (var choice in choices)
             {
                 i++;
-                lines.Add(""+i+") "+choice);
+                lines.Add("" + i + ") " + choice);
             }
 
             return lines;
@@ -361,7 +514,7 @@ namespace Kilo.Commons.Utils
                 });
                 wait();
             }
-            
+
             while (stillWorking)
             {
                 if (Game.IsControlJustReleased(0, key))
@@ -369,6 +522,7 @@ namespace Kilo.Commons.Utils
                     pressed = true;
                     return pressed;
                 }
+
                 await BaseScript.Delay(0);
             }
 
@@ -383,12 +537,13 @@ namespace Kilo.Commons.Utils
         }
 
         public static async void Draw3DText(Vector3 pos, string text, float scaleFactor = 0.5f,
-            int duration = 5000, int red = 255, int green = 255, int blue = 255, int opacity = 150, Entity attachTo = null)
+            int duration = 5000, int red = 255, int green = 255, int blue = 255, int opacity = 150,
+            Entity attachTo = null)
         {
             if (attachTo == null)
             {
                 Text3DInProgress.Add(text);
-                Draw3DTextHandler(pos, scaleFactor, text, duration, red, green, blue, opacity);    
+                Draw3DTextHandler(pos, scaleFactor, text, duration, red, green, blue, opacity);
             }
             else
             {
@@ -445,12 +600,13 @@ namespace Kilo.Commons.Utils
             API.EndTextCommandPrint(duration, showImmediately);
             await BaseScript.Delay(duration);
         }
-        
-        public static async Task SubtitleChat(Entity entity, string chat, int red = 255, int green = 255, int blue = 255,
+
+        public static async Task SubtitleChat(Entity entity, string chat, int red = 255, int green = 255,
+            int blue = 255,
             int opacity = 255)
         {
             int time = chat.Length * 150;
-            Utils.Draw3DText(new Vector3(0f,0f, 1f), chat, 0.5f,
+            Utils.Draw3DText(new Vector3(0f, 0f, 1f), chat, 0.5f,
                 time,
                 red, green, blue, opacity, entity);
             await BaseScript.Delay(time);
@@ -502,7 +658,6 @@ namespace Kilo.Commons.Utils
                 Draw3DTextDrawNonLoop(pos, scaleFactor, text, red, green, blue, opacity);
                 await BaseScript.Delay(0);
             }
-            
         }
 
         public static async Task CaptureEntity(Entity ent)
@@ -511,19 +666,19 @@ namespace Kilo.Commons.Utils
             ent.IsPersistent = true;
             if (ent.Model.IsPed)
             {
-                KeepTask((Ped)ent);    
+                KeepTask((Ped)ent);
             }
         }
-        
+
         public static bool CanEntitySeeEntity(Entity ent1, Entity ent2)
-                {
-                    return API.HasEntityClearLosToEntityInFront(ent1.Handle, ent2.Handle);
-                }
+        {
+            return API.HasEntityClearLosToEntityInFront(ent1.Handle, ent2.Handle);
+        }
 
 
         public static async Task WaitUntilPedCanSeePed(Ped ped1, Ped ped2, int bufferms = 1000)
         {
-            while (!API.HasEntityClearLosToEntityInFront(ped1.Handle,ped2.Handle))
+            while (!API.HasEntityClearLosToEntityInFront(ped1.Handle, ped2.Handle))
                 await BaseScript.Delay(bufferms);
         }
 
@@ -533,7 +688,8 @@ namespace Kilo.Commons.Utils
                 await BaseScript.Delay(100);
         }
 
-        public static Ped GetClosestPed(Vector3 pos, float maxDistance = 20f, bool ignoreVehicles = false, bool findAlive = true, bool findPlayers = false)
+        public static Ped GetClosestPed(Vector3 pos, float maxDistance = 20f, bool ignoreVehicles = false,
+            bool findAlive = true, bool findPlayers = false)
         {
             Ped[] allPeds = World.GetAllPeds();
             Ped closest = null;
@@ -632,7 +788,7 @@ namespace Kilo.Commons.Utils
                     if ((bool)config["AnonymousErrorReporting"])
                     {
                         //BaseScript.TriggerServerEvent("247Robbery::ErrorToWebhook",
-                          //  "Error in 247Robbery Callout: \n" + err.ToString());
+                        //  "Error in 247Robbery Callout: \n" + err.ToString());
                     }
                 }
                 catch (Exception err2)
@@ -676,9 +832,9 @@ namespace Kilo.Commons.Utils
             // Code
             if (ped == null)
                 //Debug.WriteLine("Ped is null");
-            if (targetPed == null)
-                //Debug.WriteLine("Target is null");
-            ped.Task.ClearSecondary();
+                if (targetPed == null)
+                    //Debug.WriteLine("Target is null");
+                    ped.Task.ClearSecondary();
             ped.Detach();
 
             API.AttachEntityToEntity(targetPed.Handle, ped.Handle, 0, -0.24f, 0.11f, 0f, 0.5f, 0.5f, 0f, false, false,
@@ -765,6 +921,7 @@ namespace Kilo.Commons.Utils
                     ped.AlwaysKeepTask = false;
                     ped.BlockPermanentEvents = false;
                 }
+
                 ent.IsPersistent = false;
                 EntitiesInMemory.Remove(ent);
             }
@@ -848,8 +1005,10 @@ namespace Kilo.Commons.Utils
                 1f);
         }
 
-        public static async Task<Blip> CreateLocationBlip(Vector3 pos, float radius = 5f, bool showRoute = true, BlipColor color = BlipColor.Yellow,
-            BlipSprite sprite = BlipSprite.BigCircle,string name = "", bool isRadius = true, bool attachToEntity = false, Entity entityToAttachTo = null, bool isFlashing = false)
+        public static async Task<Blip> CreateLocationBlip(Vector3 pos, float radius = 5f, bool showRoute = true,
+            BlipColor color = BlipColor.Yellow,
+            BlipSprite sprite = BlipSprite.BigCircle, string name = "", bool isRadius = true,
+            bool attachToEntity = false, Entity entityToAttachTo = null, bool isFlashing = false)
         {
             Blip blip;
             if (!attachToEntity)
@@ -861,6 +1020,7 @@ namespace Kilo.Commons.Utils
                 if (entityToAttachTo == null) return null;
                 blip = entityToAttachTo.AttachBlip();
             }
+
             //Debug.WriteLine(color.ToString());
             blip.Sprite = sprite;
             blip.Name = name;
@@ -868,9 +1028,9 @@ namespace Kilo.Commons.Utils
             blip.Color = color;
             blip.ShowRoute = showRoute;
             blip.Alpha = 80;
-            
+
             //Debug.WriteLine(blip.Color.ToString());
-            
+
             return blip;
         }
 
@@ -926,7 +1086,8 @@ namespace Kilo.Commons.Utils
             }
         }
 
-        public static async Task TaskVehiclePark(Ped ped, Vehicle vehicle, Vector3 pos, float radius, bool keepEngineRunning = false, int timeoutAfterDuration = 30000)
+        public static async Task TaskVehiclePark(Ped ped, Vehicle vehicle, Vector3 pos, float radius,
+            bool keepEngineRunning = false, int timeoutAfterDuration = 30000)
         {
             pos = pos.Around(5f);
             bool stillWorking = true;
@@ -939,11 +1100,13 @@ namespace Kilo.Commons.Utils
                         stillWorking = false;
                         return;
                     }
+
                     if (!ped.IsInVehicle())
                     {
                         stillWorking = false;
                         return;
                     }
+
                     await BaseScript.Delay(100);
                 }
             });
@@ -970,9 +1133,8 @@ namespace Kilo.Commons.Utils
                     }
                 }
             }
-            
+
             if (!stillWorking) return;
-            
         }
 
         public enum GoToType
@@ -980,10 +1142,30 @@ namespace Kilo.Commons.Utils
             Run,
             Walk
         }
-        public static async Task KeepTaskGoToForPed(Ped ped, Vector3 pos, float buffer = 2f, GoToType type = GoToType.Walk)
+
+        public static async Task KeepTaskGoToForPed(Ped ped, Vector3 pos, float buffer = 2f,
+            GoToType type = GoToType.Walk)
         {
             Vector3 startPos = ped.Position;
-            while (true)
+            switch (type)
+            {
+                case GoToType.Walk:
+                {
+                    ped.Task.GoTo(pos);
+                    break;
+                }
+                case GoToType.Run:
+                {
+                    ped.Task.RunTo(pos);
+                    break;
+                }
+                default:
+                {
+                    ped.Task.GoTo(pos);
+                    break;
+                }
+            }
+            while (ped.Position.DistanceTo(pos) > buffer)
             {
                 await BaseScript.Delay(1000);
                 if (ped.Position == startPos)
@@ -1007,11 +1189,6 @@ namespace Kilo.Commons.Utils
                         }
                     }
                 }
-                
-                
-
-                if (ped.Position.DistanceTo(pos) < buffer)
-                    return;
                 await BaseScript.Delay(1000);
             }
         }
@@ -1038,11 +1215,13 @@ namespace Kilo.Commons.Utils
                     stillWorking = false;
                     return;
                 }
+
                 if (ent.Position.DistanceTo(pos) < buffer)
                 {
                     stillWorking = false;
                     return;
                 }
+
                 wait();
                 await BaseScript.Delay(200);
             }
@@ -1092,12 +1271,13 @@ namespace Kilo.Commons.Utils
             while (keepTaskAnimation.Contains(ped))
             {
                 if (ped == null || ped.IsDead || ped.IsCuffed) break;
-                
+
                 if (!API.IsEntityPlayingAnim(ped.Handle, animDict, animSet, 3))
                 {
                     //Debug.WriteLine(animDict + ", " +animSet);
                     ped.Task.PlayAnimation(animDict, animSet, 8f, 8f, -1, flags, 1f);
                 }
+
                 await BaseScript.Delay(1000);
             }
         }
