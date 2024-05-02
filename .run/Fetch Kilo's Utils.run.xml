@@ -1,6 +1,6 @@
 ﻿<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Clone Kilo's Utils" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="git clone https://github.com/DevKilo1/Kilo.Commons.Utils.git ./Kilo.Commons.Utils; mv ./Kilo.Commons.Utils/Utils.cs ./; rm -r -fo ./Kilo.Commons.Utils" />
+  <configuration default="false" name="Fetch Kilo's Utils" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="git clone https://github.com/DevKilo1/Kilo.Commons.Utils.git ./Kilo.Commons.Utils; rm ./Utils.cs; mv ./Kilo.Commons.Utils/Utils.cs ./; rm -r -fo./Kilo.Commons.Utils" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

@@ -14,4 +14,8 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Kilo.Commons.Config.net.1.0.0.nupkg" />
+    </ItemGroup>
+
 </Project>

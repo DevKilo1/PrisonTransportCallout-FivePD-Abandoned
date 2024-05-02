@@ -117,11 +117,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\repos\\CalloutTemplate\\PrisonTransport.csproj",
+      "projectUniqueName": "D:\\repos\\PrisonTransportCallout-FivePD\\PrisonTransport.csproj",
       "projectName": "PrisonTransport.net",
-      "projectPath": "D:\\repos\\CalloutTemplate\\PrisonTransport.csproj",
+      "projectPath": "D:\\repos\\PrisonTransportCallout-FivePD\\PrisonTransport.csproj",
       "packagesPath": "C:\\Users\\lukni\\.nuget\\packages\\",
-      "outputPath": "D:\\repos\\CalloutTemplate\\obj\\",
+      "outputPath": "D:\\repos\\PrisonTransportCallout-FivePD\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\lukni\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -130,6 +130,7 @@
         "net452"
       ],
       "sources": {
+        "D:\\repos\\Kilo.Commons.Config\\Kilo.Commons.Config\\bin\\Debug\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
